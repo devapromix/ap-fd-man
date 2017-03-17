@@ -54,33 +54,33 @@ end;
 
 function EqualsRect(A, B: TRect): Boolean;
 begin
-  Result := (A.Left = B.Left) and (A.Top = B.Top)
-    and (A.Right = B.Right) and (A.Bottom = B.Bottom)
+  Result := (A.Left = B.Left) and (A.Top = B.Top) and (A.Right = B.Right) and
+    (A.Bottom = B.Bottom)
 end;
 
-procedure GetTitleList(sl: TStringList);
-var wnd: hwnd;
-    buff: array [0..127] of char;
+procedure GetTitleList(SL: TStringList);
+var
+  Wnd: hwnd;
+  Buff: array [0 .. 127] of char;
 begin
-sl.clear;
-wnd := GetWindow(Application.handle, gw_hwndfirst);
-while wnd <> 0 do
-begin // Не показываем:
-if (wnd <> Application.Handle) // Собственное окно
-and IsWindowVisible(wnd) // Невидимые окна
-and (GetWindow(wnd, gw_owner) = 0) // Дочерние окна
-and (GetWindowText(wnd, buff, SizeOf(buff)) <> 0) then
-begin
-GetWindowText(wnd, buff, SizeOf(buff));
-sl.Add(StrPas(buff));
-end;
-wnd := GetWindow(wnd, gw_hwndnext);
-end;
+  SL.Clear;
+  Wnd := GetWindow(Application.handle, gw_hwndfirst);
+  while Wnd <> 0 do
+  begin
+    if (Wnd <> Application.handle) and IsWindowVisible(Wnd) and
+      (GetWindow(Wnd, gw_owner) = 0) and
+      (GetWindowText(Wnd, Buff, SizeOf(Buff)) <> 0) then
+    begin
+      GetWindowText(Wnd, Buff, SizeOf(Buff));
+      SL.Add(StrPas(Buff));
+    end;
+    Wnd := GetWindow(Wnd, gw_hwndnext);
+  end;
 end;
 
 procedure SetWindow(ADescr: string; ARect: TRect);
 var
-  HW: HWND;
+  HW: hwnd;
 begin
   HW := FindWindow(nil, PAnsiChar(ADescr));
   if (HW <> 0) then
@@ -90,17 +90,17 @@ end;
 
 function GetWindowClassName(ADescr: string): string;
 var
-  Cs: array[0..255] of Char;
-  HW: HWND;
+  Cs: array [0 .. 255] of char;
+  HW: hwnd;
 begin
   HW := FindWindow(nil, PAnsiChar(ADescr));
-  Windows.GetClassName(HW, Cs,255);
-  Result := String(Cs);
+  Windows.GetClassName(HW, Cs, 255);
+  Result := StrPas(Cs);
 end;
 
 function GetWindow(ADescr: string): TRect;
 var
-  HW: HWND;
+  HW: hwnd;
 begin
   HW := FindWindow(nil, PAnsiChar(ADescr));
   Windows.GetWindowRect(HW, Result);
@@ -108,7 +108,7 @@ end;
 
 function HasWindow(ADescr: string): Boolean;
 var
-  HW: HWND;
+  HW: hwnd;
 begin
   HW := FindWindow(nil, PAnsiChar(ADescr));
   Result := IsWindow(HW);
@@ -122,9 +122,9 @@ begin
   try
     if F.SectionExists(ASection) then
     begin
-      MyRect.Left   := F.ReadInteger(ASection, 'Left', 0);
-      MyRect.Top    := F.ReadInteger(ASection, 'Top', 0);
-      MyRect.Right  := F.ReadInteger(ASection, 'Right', 200);
+      MyRect.Left := F.ReadInteger(ASection, 'Left', 0);
+      MyRect.Top := F.ReadInteger(ASection, 'Top', 0);
+      MyRect.Right := F.ReadInteger(ASection, 'Right', 200);
       MyRect.Bottom := F.ReadInteger(ASection, 'Bottom', 200);
     end;
   finally
@@ -136,7 +136,8 @@ procedure Save(ASection: string);
 var
   F: TIniFile;
 begin
-  if (GetWindowClassName(ASection) <> 'CabinetWClass') then Exit;
+  if (GetWindowClassName(ASection) <> 'CabinetWClass') then
+    Exit;
   F := TIniFile.Create(GetPath + 'fman.ini');
   try
     F.WriteInteger(ASection, 'Left', MyRect.Left);
@@ -149,20 +150,19 @@ begin
 end;
 
 procedure TfMain.FormCreate(Sender: TObject);
+// var reg: tregistry;
 begin
   SL := TStringList.Create;
   MyRect := Rect(100, 100, 300, 300);
-     {
-var reg: tregistry;
-begin
-reg := tregistry.create;
-reg.rootkey := hkey_local_machine;
-reg.lazywrite := false;
-reg.openkey('software\microsoft\windows\currentversion\run', false);
-reg.writestring('fman', application.exename);
-reg.closekey;
-reg.free;
-end;}
+  {
+    reg := tregistry.create;
+    reg.rootkey := hkey_local_machine;
+    reg.lazywrite := false;
+    reg.openkey('software\microsoft\windows\currentversion\run', false);
+    reg.writestring('fman', application.exename);
+    reg.closekey;
+    reg.free;
+  }
 end;
 
 procedure TfMain.BitBtn1Click(Sender: TObject);
@@ -175,10 +175,11 @@ var
   R: TRect;
 begin
   GetTitleList(SL);
-  if not HasWindow('Новая папка') then Exit;
+  if not HasWindow('Новая папка') then
+    Exit;
   if not Flag then
   begin
-    // Зап. только раз
+    // Init
     Load('Новая папка');
     Button1Click(Sender);
     Flag := True;
@@ -186,7 +187,8 @@ begin
   end;
   R := GetWindow('Новая папка');
 
-  if not EqualsRect(R, MyRect) then Button2Click(Sender);
+  if not EqualsRect(R, MyRect) then
+    Button2Click(Sender);
 
   Label1.Caption := Format('L: %d, T: %d, R: %d, B: %d',
     [R.Left, R.Top, R.Right, R.Bottom]);
@@ -196,15 +198,17 @@ end;
 
 procedure TfMain.Button1Click(Sender: TObject);
 begin
-  // Загр. текущ. поз.
-  if not HasWindow('Новая папка') then Exit;
+  // Load
+  if not HasWindow('Новая папка') then
+    Exit;
   SetWindow('Новая папка', MyRect);
 end;
 
 procedure TfMain.Button2Click(Sender: TObject);
 begin
-  // Сохр.
-  if not HasWindow('Новая папка') then Exit;
+  // Save
+  if not HasWindow('Новая папка') then
+    Exit;
   MyRect := GetWindow('Новая папка');
 end;
 
@@ -221,7 +225,8 @@ var
 begin
   // Save to ini
   for I := 0 to SL.Count - 1 do
-    if HasWindow(SL[I]) then Save(SL[I]);
+    if HasWindow(SL[I]) then
+      Save(SL[I]);
 end;
 
 procedure TfMain.FormDestroy(Sender: TObject);
@@ -235,4 +240,3 @@ begin
 end;
 
 end.
- 
