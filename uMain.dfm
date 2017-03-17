@@ -1,6 +1,6 @@
 object fMain: TfMain
-  Left = 618
-  Top = 544
+  Left = 614
+  Top = 542
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'FMan'
@@ -21,24 +21,24 @@ object fMain: TfMain
     Left = 264
     Top = 0
     Width = 105
-    Height = 97
+    Height = 57
     AutoSize = False
-    Caption = 'Label1'
     WordWrap = True
   end
   object Label2: TLabel
-    Left = 256
-    Top = 112
-    Width = 31
-    Height = 13
-    Caption = 'Label2'
+    Left = 264
+    Top = 72
+    Width = 105
+    Height = 57
+    AutoSize = False
+    WordWrap = True
   end
   object BitBtn1: TBitBtn
     Left = 8
     Top = 96
     Width = 75
     Height = 25
-    Caption = 'BitBtn1'
+    Caption = 'Win List'
     TabOrder = 0
     OnClick = BitBtn1Click
   end
@@ -60,10 +60,25 @@ object fMain: TfMain
     TabOrder = 2
     OnClick = Button2Click
   end
+  object Button3: TButton
+    Left = 8
+    Top = 136
+    Width = 75
+    Height = 25
+    Caption = 'Reset'
+    TabOrder = 3
+    OnClick = Button3Click
+  end
   object Timer1: TTimer
     Interval = 250
     OnTimer = Timer1Timer
     Left = 192
+    Top = 24
+  end
+  object Timer2: TTimer
+    Interval = 10000
+    OnTimer = Timer2Timer
+    Left = 224
     Top = 24
   end
 end
