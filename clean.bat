@@ -8,4 +8,5 @@ del *.otares
 del *.local
 del *.cfg
 del *.ddp
+del *.ini
 del *.o

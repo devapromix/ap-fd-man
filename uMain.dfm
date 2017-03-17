@@ -15,6 +15,7 @@ object fMain: TfMain
   OldCreateOrder = False
   WindowState = wsMinimized
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -68,6 +69,15 @@ object fMain: TfMain
     Caption = 'Reset'
     TabOrder = 3
     OnClick = Button3Click
+  end
+  object Button4: TButton
+    Left = 320
+    Top = 136
+    Width = 75
+    Height = 25
+    Caption = 'Close'
+    TabOrder = 4
+    OnClick = Button4Click
   end
   object Timer1: TTimer
     Interval = 250

@@ -16,6 +16,7 @@ type
     Label2: TLabel;
     Button3: TButton;
     Timer2: TTimer;
+    Button4: TButton;
     procedure BitBtn1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -23,6 +24,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -85,6 +88,16 @@ begin
       ARect.Right - ARect.Left, ARect.Bottom - ARect.Top, SWP_FRAMECHANGED);
 end;
 
+function GetWindowClassName(ADescr: string): string;
+var
+  Cs: array[0..255] of Char;
+  HW: HWND;
+begin
+  HW := FindWindow(nil, PAnsiChar(ADescr));
+  Windows.GetClassName(HW, Cs,255);
+  Result := String(Cs);
+end;
+
 function GetWindow(ADescr: string): TRect;
 var
   HW: HWND;
@@ -101,34 +114,35 @@ begin
   Result := IsWindow(HW);
 end;
 
-procedure Load();
+procedure Load(ASection: string);
 var
   F: TIniFile;
 begin
   F := TIniFile.Create(GetPath + 'fman.ini');
   try
-    if F.SectionExists('Новая папка') then
+    if F.SectionExists(ASection) then
     begin
-      MyRect.Left   := F.ReadInteger('Новая папка', 'Left', 0);
-      MyRect.Top    := F.ReadInteger('Новая папка', 'Top', 0);
-      MyRect.Right  := F.ReadInteger('Новая папка', 'Right', 200);
-      MyRect.Bottom := F.ReadInteger('Новая папка', 'Bottom', 200);
+      MyRect.Left   := F.ReadInteger(ASection, 'Left', 0);
+      MyRect.Top    := F.ReadInteger(ASection, 'Top', 0);
+      MyRect.Right  := F.ReadInteger(ASection, 'Right', 200);
+      MyRect.Bottom := F.ReadInteger(ASection, 'Bottom', 200);
     end;
   finally
     F.Free;
   end;
 end;
 
-procedure Save();
+procedure Save(ASection: string);
 var
   F: TIniFile;
 begin
+  if (GetWindowClassName(ASection) <> 'CabinetWClass') then Exit;
   F := TIniFile.Create(GetPath + 'fman.ini');
   try
-    F.WriteInteger('Новая папка', 'Left', MyRect.Left);
-    F.WriteInteger('Новая папка', 'Top', MyRect.Top);
-    F.WriteInteger('Новая папка', 'Right', MyRect.Right);
-    F.WriteInteger('Новая папка', 'Bottom', MyRect.Bottom);
+    F.WriteInteger(ASection, 'Left', MyRect.Left);
+    F.WriteInteger(ASection, 'Top', MyRect.Top);
+    F.WriteInteger(ASection, 'Right', MyRect.Right);
+    F.WriteInteger(ASection, 'Bottom', MyRect.Bottom);
   finally
     F.Free;
   end;
@@ -138,24 +152,34 @@ procedure TfMain.FormCreate(Sender: TObject);
 begin
   SL := TStringList.Create;
   MyRect := Rect(100, 100, 300, 300);
+     {
+var reg: tregistry;
+begin
+reg := tregistry.create;
+reg.rootkey := hkey_local_machine;
+reg.lazywrite := false;
+reg.openkey('software\microsoft\windows\currentversion\run', false);
+reg.writestring('fman', application.exename);
+reg.closekey;
+reg.free;
+end;}
 end;
 
 procedure TfMain.BitBtn1Click(Sender: TObject);
 begin
-  GetTitleList(SL);
-  if HasWindow('Новая папка') then
-    ShowMessage(SL.Text);
+  ShowMessage(SL.Text);
 end;
 
 procedure TfMain.Timer1Timer(Sender: TObject);
 var
   R: TRect;
 begin
+  GetTitleList(SL);
   if not HasWindow('Новая папка') then Exit;
   if not Flag then
   begin
     // Зап. только раз
-    Load();
+    Load('Новая папка');
     Button1Click(Sender);
     Flag := True;
     Exit;
@@ -192,10 +216,22 @@ begin
 end;
 
 procedure TfMain.Timer2Timer(Sender: TObject);
+var
+  I: Integer;
 begin
   // Save to ini
-  if not HasWindow('Новая папка') then Exit;
-  Save();
+  for I := 0 to SL.Count - 1 do
+    if HasWindow(SL[I]) then Save(SL[I]);
+end;
+
+procedure TfMain.FormDestroy(Sender: TObject);
+begin
+  SL.Free;
+end;
+
+procedure TfMain.Button4Click(Sender: TObject);
+begin
+  Close;
 end;
 
 end.
