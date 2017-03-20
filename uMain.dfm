@@ -34,6 +34,14 @@ object fMain: TfMain
     AutoSize = False
     WordWrap = True
   end
+  object Label3: TLabel
+    Left = 128
+    Top = 72
+    Width = 105
+    Height = 57
+    AutoSize = False
+    WordWrap = True
+  end
   object BitBtn1: TBitBtn
     Left = 8
     Top = 96
@@ -41,7 +49,6 @@ object fMain: TfMain
     Height = 25
     Caption = 'Win List'
     TabOrder = 0
-    OnClick = BitBtn1Click
   end
   object Button1: TButton
     Left = 8
@@ -50,7 +57,6 @@ object fMain: TfMain
     Height = 25
     Caption = #1047#1072#1075#1088#1091#1079#1080#1090#1100
     TabOrder = 1
-    OnClick = Button1Click
   end
   object Button2: TButton
     Left = 8
@@ -59,7 +65,6 @@ object fMain: TfMain
     Height = 25
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
     TabOrder = 2
-    OnClick = Button2Click
   end
   object Button3: TButton
     Left = 8
@@ -68,7 +73,6 @@ object fMain: TfMain
     Height = 25
     Caption = 'Reset'
     TabOrder = 3
-    OnClick = Button3Click
   end
   object Button4: TButton
     Left = 320
