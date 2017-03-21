@@ -23,7 +23,6 @@ type
     { Private declarations }
     SL, LastSL: TStringList;
     procedure AddLog(S: string);
-    procedure Load(var ARect: TRect; ASection: string);
     procedure Save(ASection: string);
     function EqualsRect(A, B: TRect): Boolean;
     function GetPath: string;
@@ -119,7 +118,7 @@ begin
     SetWindowPos(HW, HWND_BOTTOM, ARect.Left, ARect.Top,
       ARect.Right - ARect.Left, ARect.Bottom - ARect.Top, SWP_FRAMECHANGED);
   // Зап. в лог
-  AddLog(Format('%s: L:%d,T:%d,R:%d,B:%d>',
+  AddLog(Format('%s >> L:%d,T:%d,R:%d,B:%d>',
     [ADescr, ARect.Left, ARect.Top, ARect.Right, ARect.Bottom]));
 end;
 
@@ -159,29 +158,6 @@ begin
         Result.Right := F.ReadInteger(ASection, 'Right', 150);
         Result.Bottom := F.ReadInteger(ASection, 'Bottom', 300);
         Flag := True;
-      end;
-    finally
-      F.Free;
-    end;
-  except
-
-  end;
-end;
-
-procedure TfMain.Load(var ARect: TRect; ASection: string);
-var
-  F: TIniFile;
-begin
-  // Загр. разм. и поз. окна из файла
-  try
-    F := TIniFile.Create(GetPath + 'fman.ini');
-    try
-      if F.SectionExists(ASection) then
-      begin
-        ARect.Left := F.ReadInteger(ASection, 'Left', 0);
-        ARect.Top := F.ReadInteger(ASection, 'Top', 0);
-        ARect.Right := F.ReadInteger(ASection, 'Right', 150);
-        ARect.Bottom := F.ReadInteger(ASection, 'Bottom', 300);
       end;
     finally
       F.Free;
