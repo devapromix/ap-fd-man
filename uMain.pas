@@ -7,40 +7,24 @@ uses
   Dialogs, StdCtrls, Buttons, ExtCtrls, ComCtrls;
 
 type
-  TWnRec = record
-    Flag: Boolean;
-    Rect: TRect;
-  end;
-
-type
   TfMain = class(TForm)
-    BitBtn1: TBitBtn;
-    Timer1: TTimer;
     Label1: TLabel;
-    Button1: TButton;
-    Button2: TButton;
     Label2: TLabel;
-    Button3: TButton;
-    Timer2: TTimer;
+    SaveTimer: TTimer;
     Button4: TButton;
-    Label3: TLabel;
     RichEdit1: TRichEdit;
-    procedure Timer1Timer(Sender: TObject);
+    MainTimer: TTimer;
     procedure FormCreate(Sender: TObject);
-    procedure Timer2Timer(Sender: TObject);
+    procedure SaveTimerTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button4Click(Sender: TObject);
+    procedure MainTimerTimer(Sender: TObject);
   private
     { Private declarations }
-    WnRecArr: array of TWnRec;
-    Flag: Boolean;
-    MyRect: TRect;
     SL, LastSL: TStringList;
     procedure AddLog(S: string);
-    procedure Load(ASection: string);
+    procedure Load(var ARect: TRect; ASection: string);
     procedure Save(ASection: string);
-    procedure SaveToIni(ASection: string);
-    procedure LoadFromIni(ASection: string);
     function EqualsRect(A, B: TRect): Boolean;
     function GetPath: string;
     function GetWindowClassName(ADescr: string): string;
@@ -49,7 +33,7 @@ type
     function HasWindow(ADescr: string): Boolean;
     function GetWindow(ADescr: string): TRect;
     procedure SetWindow(ADescr: string; ARect: TRect);
-    procedure AddWnRecElem();
+    function LoadWindowCoords(ASection: string; var Flag: Boolean): TRect;
   public
     { Public declarations }
   end;
@@ -118,9 +102,12 @@ begin
     begin
       LastSL.Append(SL[I]);
       S := Trim(SL[I]);
-      Exit;
+      Break;
     end;
   end;
+  Label1.Caption := SL.Text;
+  LastSL.Assign(SL);
+  Label2.Caption := LastSL.Text;
 end;
 
 procedure TfMain.SetWindow(ADescr: string; ARect: TRect);
@@ -131,6 +118,9 @@ begin
   if (HW <> 0) then
     SetWindowPos(HW, HWND_BOTTOM, ARect.Left, ARect.Top,
       ARect.Right - ARect.Left, ARect.Bottom - ARect.Top, SWP_FRAMECHANGED);
+  // Зап. в лог
+  AddLog(Format('%s: L:%d,T:%d,R:%d,B:%d>',
+    [ADescr, ARect.Left, ARect.Top, ARect.Right, ARect.Bottom]));
 end;
 
 function TfMain.GetWindow(ADescr: string): TRect;
@@ -150,50 +140,62 @@ begin
     and (GetWindowClassName(ADescr) = 'CabinetWClass');
 end;
 
-procedure TfMain.Load(ASection: string);
+function TfMain.LoadWindowCoords(ASection: string; var Flag: Boolean): TRect;
 var
   F: TIniFile;
 begin
-  F := TIniFile.Create(GetPath + 'fman.ini');
+  Result.Left := 0;
+  Result.Top := 0;
+  Result.Right := 150;
+  Result.Bottom := 300;
+  Flag := False;
   try
-    if F.SectionExists(ASection) then
-    begin
-      MyRect.Left := F.ReadInteger(ASection, 'Left', 0);
-      MyRect.Top := F.ReadInteger(ASection, 'Top', 0);
-      MyRect.Right := F.ReadInteger(ASection, 'Right', 200);
-      MyRect.Bottom := F.ReadInteger(ASection, 'Bottom', 200);
+    F := TIniFile.Create(GetPath + 'fman.ini');
+    try
+      if F.SectionExists(ASection) then
+      begin
+        Result.Left := F.ReadInteger(ASection, 'Left', 0);
+        Result.Top := F.ReadInteger(ASection, 'Top', 0);
+        Result.Right := F.ReadInteger(ASection, 'Right', 150);
+        Result.Bottom := F.ReadInteger(ASection, 'Bottom', 300);
+        Flag := True;
+      end;
+    finally
+      F.Free;
     end;
-  finally
-    F.Free;
+  except
+
   end;
 end;
 
-procedure TfMain.Save(ASection: string);
+procedure TfMain.Load(var ARect: TRect; ASection: string);
 var
   F: TIniFile;
 begin
-  if (GetWindowClassName(ASection) <> 'CabinetWClass') then
-    Exit;
-  F := TIniFile.Create(GetPath + 'fman.ini');
+  // Загр. разм. и поз. окна из файла
   try
-    F.WriteInteger(ASection, 'Left', MyRect.Left);
-    F.WriteInteger(ASection, 'Top', MyRect.Top);
-    F.WriteInteger(ASection, 'Right', MyRect.Right);
-    F.WriteInteger(ASection, 'Bottom', MyRect.Bottom);
-  finally
-    F.Free;
+    F := TIniFile.Create(GetPath + 'fman.ini');
+    try
+      if F.SectionExists(ASection) then
+      begin
+        ARect.Left := F.ReadInteger(ASection, 'Left', 0);
+        ARect.Top := F.ReadInteger(ASection, 'Top', 0);
+        ARect.Right := F.ReadInteger(ASection, 'Right', 150);
+        ARect.Bottom := F.ReadInteger(ASection, 'Bottom', 300);
+      end;
+    finally
+      F.Free;
+    end;
+  except
+
   end;
 end;
 
 procedure TfMain.FormCreate(Sender: TObject);
 // var reg: tregistry;
 begin
-  SetLength(WnRecArr, 0);
-
-  Flag := False;
   SL := TStringList.Create;
   LastSL := TStringList.Create;
-  MyRect := Rect(100, 100, 300, 300);
   {
     reg := tregistry.create;
     reg.rootkey := hkey_local_machine;
@@ -211,76 +213,66 @@ begin
   SL.Free;
 end;
 
-procedure TfMain.LoadFromIni(ASection: string);
-begin
-  if not HasWindow(ASection) then Exit;
-  SetWindow(ASection, MyRect);
-end;
-
-procedure TfMain.SaveToIni(ASection: string);
-begin
-  if not HasWindow(ASection) then Exit;
-  MyRect := GetWindow(ASection);
-end;
-
-procedure TfMain.Timer1Timer(Sender: TObject);
+procedure TfMain.Save(ASection: string);
 var
+  F: TIniFile;
   R: TRect;
-  S: string;
 begin
-  GetTitleList(SL);
-  CheckTitleList(S);
-
-  if (S = '') then Exit;
-
-  if not HasWindow(S) then Exit;
-  if not Flag then
-  begin
-    // Init
-    Load(S);
-    LoadFromIni(S);
-    Flag := True;
-    Exit;
+  // Сохр. поз. и размер окна в файл
+  if (GetWindowClassName(ASection) <> 'CabinetWClass') then Exit;
+  R := GetWindow(ASection);
+  F := TIniFile.Create(GetPath + 'fman.ini');
+  try
+    F.WriteInteger(ASection, 'Left', R.Left);
+    F.WriteInteger(ASection, 'Top', R.Top);
+    F.WriteInteger(ASection, 'Right', R.Right);
+    F.WriteInteger(ASection, 'Bottom', R.Bottom);
+  finally
+    F.Free;
   end;
-  R := GetWindow(S);
-
-  // Save
-  if not EqualsRect(R, MyRect) then
-  begin
-    SaveToIni(S);
-    AddLog(Format('Папка "%s" [L: %d, T: %d, R: %d, B: %d].',
-    [S, R.Left, R.Top, R.Right, R.Bottom]));
-  end;
-
-//  Label1.Caption := Format('L: %d, T: %d, R: %d, B: %d',
-//    [R.Left, R.Top, R.Right, R.Bottom]);
-//  Label2.Caption := Format('L: %d, T: %d, R: %d, B: %d',
-//    [MyRect.Left, MyRect.Top, MyRect.Right, MyRect.Bottom]);
 end;
 
-procedure TfMain.Timer2Timer(Sender: TObject);
+procedure TfMain.SaveTimerTimer(Sender: TObject);
 var
   I: Integer;
 begin
-  // Save to ini
+  // Сохр. поз. и разм. всех окон
   for I := 0 to SL.Count - 1 do
     if HasWindow(SL[I]) then
       Save(SL[I]);
 end;
 
-procedure TfMain.AddWnRecElem;
-begin
-
-end;
-
 procedure TfMain.Button4Click(Sender: TObject);
 begin
+  // Закрыть
   Close;
 end;
 
 procedure TfMain.AddLog(S: string);
 begin
+  // Запись
   RichEdit1.Lines.Add(S);
+end;
+
+procedure TfMain.MainTimerTimer(Sender: TObject);
+var
+  R, L: TRect;
+  B: Boolean;
+  S: string;
+begin
+  // Осн. таймер
+  GetTitleList(SL);
+  // Если появилось новое окно
+  CheckTitleList(S);
+  if (S = '') or not HasWindow(S) then Exit;
+  // Загр. положение папки
+  R := GetWindow(S);
+  // Загр. посл. положение папки
+  L := LoadWindowCoords(S, B);
+  // Сравниваем
+  if EqualsRect(R, L) then Exit;
+  // Устанавливаем окно в коорд
+  if B then SetWindow(S, L);
 end;
 
 end.

@@ -19,90 +19,50 @@ object fMain: TfMain
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 264
-    Top = 0
-    Width = 105
+    Left = 280
+    Top = 8
+    Width = 113
     Height = 57
     AutoSize = False
     WordWrap = True
   end
   object Label2: TLabel
-    Left = 264
-    Top = 72
-    Width = 105
+    Left = 280
+    Top = 80
+    Width = 113
     Height = 57
     AutoSize = False
     WordWrap = True
-  end
-  object Label3: TLabel
-    Left = 272
-    Top = 112
-    Width = 105
-    Height = 57
-    AutoSize = False
-    WordWrap = True
-  end
-  object BitBtn1: TBitBtn
-    Left = 8
-    Top = 96
-    Width = 75
-    Height = 25
-    Caption = 'Win List'
-    TabOrder = 0
-  end
-  object Button1: TButton
-    Left = 8
-    Top = 8
-    Width = 75
-    Height = 25
-    Caption = #1047#1072#1075#1088#1091#1079#1080#1090#1100
-    TabOrder = 1
-  end
-  object Button2: TButton
-    Left = 8
-    Top = 40
-    Width = 75
-    Height = 25
-    Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
-    TabOrder = 2
-  end
-  object Button3: TButton
-    Left = 8
-    Top = 136
-    Width = 75
-    Height = 25
-    Caption = 'Reset'
-    TabOrder = 3
   end
   object Button4: TButton
-    Left = 320
-    Top = 136
-    Width = 75
-    Height = 25
+    Left = 280
+    Top = 144
+    Width = 115
+    Height = 17
     Caption = 'Close'
-    TabOrder = 4
+    TabOrder = 0
     OnClick = Button4Click
   end
   object RichEdit1: TRichEdit
-    Left = 88
+    Left = 8
     Top = 8
-    Width = 185
+    Width = 265
     Height = 153
     PlainText = True
     ReadOnly = True
     ScrollBars = ssVertical
-    TabOrder = 5
+    TabOrder = 1
   end
-  object Timer1: TTimer
+  object SaveTimer: TTimer
+    Interval = 5000
+    OnTimer = SaveTimerTimer
+    Left = 40
+    Top = 8
+  end
+  object MainTimer: TTimer
     Interval = 250
-    OnTimer = Timer1Timer
-    Left = 192
-    Top = 24
-  end
-  object Timer2: TTimer
-    Interval = 10000
-    OnTimer = Timer2Timer
-    Left = 224
-    Top = 24
+    OnTimer = MainTimerTimer
+    Left = 8
+    Top = 8
   end
 end
