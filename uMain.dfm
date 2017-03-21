@@ -35,8 +35,8 @@ object fMain: TfMain
     WordWrap = True
   end
   object Label3: TLabel
-    Left = 128
-    Top = 72
+    Left = 272
+    Top = 112
     Width = 105
     Height = 57
     AutoSize = False
@@ -82,6 +82,16 @@ object fMain: TfMain
     Caption = 'Close'
     TabOrder = 4
     OnClick = Button4Click
+  end
+  object RichEdit1: TRichEdit
+    Left = 88
+    Top = 8
+    Width = 185
+    Height = 153
+    PlainText = True
+    ReadOnly = True
+    ScrollBars = ssVertical
+    TabOrder = 5
   end
   object Timer1: TTimer
     Interval = 250

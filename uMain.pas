@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Buttons, ExtCtrls;
+  Dialogs, StdCtrls, Buttons, ExtCtrls, ComCtrls;
 
 type
   TWnRec = record
@@ -24,6 +24,7 @@ type
     Timer2: TTimer;
     Button4: TButton;
     Label3: TLabel;
+    RichEdit1: TRichEdit;
     procedure Timer1Timer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
@@ -32,9 +33,10 @@ type
   private
     { Private declarations }
     WnRecArr: array of TWnRec;
-//    Flag: Boolean;
-//    MyRect: TRect;
+    Flag: Boolean;
+    MyRect: TRect;
     SL, LastSL: TStringList;
+    procedure AddLog(S: string);
     procedure Load(ASection: string);
     procedure Save(ASection: string);
     procedure SaveToIni(ASection: string);
@@ -228,11 +230,9 @@ var
 begin
   GetTitleList(SL);
   CheckTitleList(S);
-  if (S <> '') then
-    Label3.Caption := S;
+
   if (S = '') then Exit;
 
-//  ShowMessage(S);
   if not HasWindow(S) then Exit;
   if not Flag then
   begin
@@ -248,12 +248,14 @@ begin
   if not EqualsRect(R, MyRect) then
   begin
     SaveToIni(S);
+    AddLog(Format('Папка "%s" [L: %d, T: %d, R: %d, B: %d].',
+    [S, R.Left, R.Top, R.Right, R.Bottom]));
   end;
 
-  Label1.Caption := Format('L: %d, T: %d, R: %d, B: %d',
-    [R.Left, R.Top, R.Right, R.Bottom]);
-  Label2.Caption := Format('L: %d, T: %d, R: %d, B: %d',
-    [MyRect.Left, MyRect.Top, MyRect.Right, MyRect.Bottom]);
+//  Label1.Caption := Format('L: %d, T: %d, R: %d, B: %d',
+//    [R.Left, R.Top, R.Right, R.Bottom]);
+//  Label2.Caption := Format('L: %d, T: %d, R: %d, B: %d',
+//    [MyRect.Left, MyRect.Top, MyRect.Right, MyRect.Bottom]);
 end;
 
 procedure TfMain.Timer2Timer(Sender: TObject);
@@ -274,6 +276,11 @@ end;
 procedure TfMain.Button4Click(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TfMain.AddLog(S: string);
+begin
+  RichEdit1.Lines.Add(S);
 end;
 
 end.
